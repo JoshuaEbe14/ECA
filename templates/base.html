@@ -127,8 +127,16 @@
   <section>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xl-10 col-lg-9 col-md-8 ml-auto">
-          <div class="row pt-md-5 ml-md-3 mt-md-3 mb-5">
+    <div class="col-xl-10 col-lg-9 col-md-8 ml-auto">
+      {% set flashes = get_flashed_messages(with_categories=true) %}
+      {% if flashes %}
+        {% for category, message in flashes %}
+        <div class="alert alert-info mb-2" role="alert">
+          {{ message }}
+        </div>
+        {% endfor %}
+      {% endif %}
+      <div class="row {% if flashes %}{% else %}pt-md-5 mt-md-3{% endif %} mb-5">
             <!-- <div class="col-xl-4 col-sm-4 p-2">
                     <div class="card card-common"> -->
             {% block mainblock %}

@@ -1,5 +1,5 @@
 from flask_login import login_user, login_required, logout_user, current_user
-from flask import Blueprint, request, redirect, render_template, url_for
+from flask import Blueprint, request, redirect, render_template, url_for, flash
 
 from models.forms import BookForm
 
@@ -14,6 +14,11 @@ booking = Blueprint('bookingController', __name__) # use bookingController.fn
 @booking.route('/view')
 @login_required
 def view():
+    if current_user.name == 'Admin':
+        flash('This is a non-admin function. Please log in as a non-admin user to use this function.')
+        if 'viewPackageDetail' in request.referrer:
+            return redirect(request.referrer)
+        return redirect(url_for('packageController.packages'))
     form = BookForm()
     hotel_name=request.args.get('hotel_name').strip("'")
 
