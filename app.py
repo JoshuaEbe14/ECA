@@ -33,11 +33,19 @@ app.register_blueprint(booking)
 app.register_blueprint(package)
 
 @app.template_filter('formatdate') # use this name
-def format_date(value, format="%#d/%m/%Y"):
-    """Format a date time to (Default): dd/mm/YYYY"""
+def format_date(value, format="%d/%m/%Y"):
     if value is None:
         return ""
-    return value.strftime(format)
+    try:
+        return value.strftime(format)
+    except Exception:
+        # Replaces Windows-specific '#'-modifiers with POSIX '-' and try again
+        try:
+            fmt = format.replace("%#d", "%-d").replace("%#m", "%-m")
+            return value.strftime(fmt)
+        except Exception:
+            # Final fallback that's fully portable
+            return f"{value.day}/{value.month:02d}/{value.year}"
 
 @app.template_filter('formatmoney') # use this name
 def format_money(value, ndigits=2):
@@ -80,10 +88,55 @@ def upload():
                 for item in list(dict_reader):
                     existing_user = User.getUser(email=item['customer'])
                     existing_package = Package.getPackage(hotel_name=item['hotel_name'])
-                    check_in_date=dt.datetime.strptime(item['check_in_date'], "%Y-%m-%d")
-
+                    try:
+                        check_in_date=dt.datetime.strptime(item['check_in_date'], "%Y-%m-%d")
+                    except Exception:
+                        # Skip bad date format rather than creating invalid record
+                        print(f"Skipping booking row with invalid date: {item['check_in_date']}")
+                        continue
+                    if not existing_user or not existing_package:
+                        print(f"Skipping booking row due to missing user/package: user={existing_user} package={existing_package}")
+                        continue
                     aBooking = Booking.createBooking(check_in_date=check_in_date, customer=existing_user, package=existing_package)
                     aBooking.calculate_total_cost()
+            elif datatype == "ListOfBooking":
+                # CSV columns: check_in_date, customer, hotel_names (JSON array string)
+                # For each row, create sequential bookings across the list of hotels starting at check_in_date
+                for item in list(dict_reader):
+                    raw_date = item.get('check_in_date', '').strip()
+                    # Try multiple date formats
+                    check_in_date = None
+                    for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+                        try:
+                            check_in_date = dt.datetime.strptime(raw_date, fmt)
+                            break
+                        except Exception:
+                            continue
+                    if not check_in_date:
+                        print(f"Invalid date format in row: {raw_date}")
+                        continue
+
+                    email = item.get('customer', '').strip()
+                    customer = User.getUser(email=email)
+                    if not customer:
+                        print(f"Unknown user, skipping row: {email}")
+                        continue
+
+                    hotels_raw = item.get('hotel_names', '').strip()
+                    try:
+                        hotels = json.loads(hotels_raw.replace("'", '"'))
+                    except Exception:
+                        hotels = [h.strip().strip('"').strip("'") for h in hotels_raw.split(',') if h.strip()]
+
+                    current_date = check_in_date
+                    for hotel in hotels:
+                        package = Package.getPackage(hotel_name=hotel)
+                        if not package:
+                            print(f"Package not found, skipping hotel: {hotel}")
+                            continue
+                        Booking.createBooking(check_in_date=current_date, customer=customer, package=package)
+                        # advance by duration nights
+                        current_date = current_date + dt.timedelta(days=package.duration)
                     
         return render_template("upload.html", panel="Upload")
     

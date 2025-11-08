@@ -52,6 +52,8 @@ def book():
 @login_required
 def manageBooking(days = -2000):
     bookings = list(Booking.getUserBookingsFromDate(customer=current_user, from_date=date.today()+timedelta(days = days)))
+    # Filter out any invalid records that may have been created in the past
+    bookings = [b for b in bookings if getattr(b, 'package', None) is not None and getattr(b, 'customer', None) is not None]
     if bookings:
         bookings.sort(key = lambda b: b.check_in_date)
     return render_template('userBookings.html', panel='Manage Booking', bookings=bookings)
