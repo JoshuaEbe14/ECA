@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block mainblock %}
+<div class="col-12 p-2">
+  {% if bundles|length == 0 %}
+    <h3>No Purchased Bundle</h3>
+  {% else %}
+    <div class="card card-common p-3 mb-2">
+      <div class="row font-weight-bold px-3 py-2" style="background:#002b5c;color:#fff;">
+        <div class="col-3 d-flex justify-content-center">Purchase Date</div>
+        <div class="col-3 d-flex justify-content-center">Expiry date</div>
+        <div class="col-6 d-flex justify-content-center">Packages in Bundle</div>
+      </div>
+      {% for b in bundles %}
+      <!-- Full faint separator per bundle -->
+      <div class="row align-items-stretch px-3 py-3" style="border-bottom:1px solid #e5e7eb;">
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          <div class="text-muted small text-center">{{ b.purchase_date|formatdate }}</div>
+        </div>
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          <div class="text-muted small text-center">{{ b.expiry_date|formatdate }}</div>
+        </div>
+        <div class="col-6">
+          {% for item in b.packages %}
+          <!-- Partial faint separator between packages -->
+          <div class="d-flex align-items-center py-3" style="border-bottom:1px solid #f1f3f5;">
+            <div style="width:200px;flex:0 0 230px;" class="mr-3">
+              <img src="{{ item.package.image_url }}" style="width:230px;height:180px;object-fit:cover;border-radius:6px;" />
+            </div>
+            <div class="ml-3">
+              <div class="font-weight-bold">{{ item.package.hotel_name }}</div>
+              <div class="text-muted small">
+                {% if b.expired %}
+                  {% if item.utilised %}
+                    Utilised: Yes
+                  {% else %}
+                    Expired
+                  {% endif %}
+                {% else %}
+                  {% if item.utilised %}
+                    Utilised: Yes
+                  {% else %}
+                    Utilised: Not Yet
+                  {% endif %}
+                {% endif %}
+              </div>
+              {% if (not b.expired) and (not item.utilised) %}
+              <form action="{{ url_for('bookingController.book') }}" method="POST" class="form-inline mt-1">
+                <label for="check_in_date_{{ item.package.id }}" class="mr-2 small mb-0">Check-in Date</label>
+                <input type="hidden" name="hotel_name" value="{{ item.package.hotel_name }}">
+                <input type="hidden" name="bundle_id" value="{{ b.obj.id }}">
+                <input type="hidden" name="package_id" value="{{ item.package.id }}">
+                <input type="date" id="check_in_date_{{ item.package.id }}" name="check_in_date" class="form-control form-control-sm mr-2" placeholder="dd/mm/yyyy" required>
+                <button type="submit" class="btn btn-primary btn-sm">Book</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

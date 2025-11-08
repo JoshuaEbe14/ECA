@@ -9,14 +9,20 @@ class BundledPackage(db.EmbeddedDocument):
 
     Fields
     - package: Reference to a Package
-    - utilised: Whether this package has been used/redeemed
+    - utilised: Whether this package has been used or redeemed
     """
     package = db.ReferenceField(Package, required=True)
     utilised = db.BooleanField(default=False)
 
 
 class BundlePurchase(db.Document):
-    """Represents a bundle of one or more packages purchased by a user."""
+    """Represents a bundle of one or more packages purchased by a user.
+
+    Business rules (extended):
+    - A bundle expires one year after its purchased_date.
+    - Packages must be booked before expiry; otherwise they are considered expired.
+    - Once an embedded package is booked we mark it utilised=True.
+    """
 
     meta = {"collection": "bundlePurchases"}
 
@@ -54,3 +60,32 @@ class BundlePurchase(db.Document):
             if str(bp.package.id) == str(package_id):
                 bp.utilised = True
         return bundle.save()
+
+    # ---- Expiry helpers ----
+    @property
+    def expiry_date(self):
+        """Expiry is exactly one calendar year (365 days) from purchase."""
+        if not self.purchased_date:
+            return None
+        return self.purchased_date + dt.timedelta(days=365)
+
+    @property
+    def is_expired(self):
+        exp = self.expiry_date
+        if exp is None:
+            return False
+        # Compare in UTC
+        return dt.datetime.utcnow() > exp
+
+    def package_status(self, embedded_pkg: BundledPackage):
+        """Return status string for a packaged item based on utilisation and expiry.
+
+        - If bundle expired and not utilised: 'Expired'
+        - If utilised: 'Utilised: Yes'
+        - Else: 'Un-utilised' (still available to book)
+        """
+        if embedded_pkg.utilised:
+            return 'Utilised: Yes'
+        if self.is_expired:
+            return 'Expired'
+        return 'Un-utilised'

@@ -6,6 +6,7 @@ from models.forms import BookForm
 from models.users import User
 from models.package import Package
 from models.book import Booking
+from models.bundle import BundlePurchase
 
 from datetime import date, timedelta
 
@@ -18,7 +19,6 @@ def view():
         flash('This is a non-admin function. Please log in as a non-admin user to use this function.')
         if 'viewPackageDetail' in request.referrer:
             return redirect(request.referrer)
-        return redirect(url_for('packageController.packages'))
     form = BookForm()
     hotel_name=request.args.get('hotel_name').strip("'")
 
@@ -35,6 +35,8 @@ def book():
     if request.method == 'POST':
         hotel_name=request.form.get("hotel_name")
         check_in_date=request.form.get("check_in_date") 
+        bundle_id = request.form.get("bundle_id")
+        package_id = request.form.get("package_id")
         # print('check_in_date in book', check_in_date, type(check_in_date))
         # check_in_date in book 2023-03-28 <class 'str'>
 
@@ -46,6 +48,14 @@ def book():
             aBooking = Booking.createBooking(check_in_date, current_user, existing_package) 
             # print('aBooking.check_in_date', aBooking.check_in_date, type(aBooking.check_in_date)) # type is str
             # aBooking.check_in_date 2023-03-28 <class 'str'>
+            # If booking initiated from Manage Bundle with context, mark utilised
+            if bundle_id and package_id:
+                try:
+                    BundlePurchase.mark_package_utilised(bundle_id, package_id)
+                except Exception as e:
+                    print(f"Failed to mark bundle item utilised: {e}")
+        if bundle_id and package_id:
+            return redirect(url_for('packageController.manageBundle'))
         return redirect(url_for('packageController.packages'))
 
 @booking.route('/manageBooking')

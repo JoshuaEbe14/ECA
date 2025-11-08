@@ -28,9 +28,11 @@ Model classes live in `models/bundle.py`:
 2. Click "Purchase Bundle" to create a bundle purchase for the current user.
 	 - If multiple packages are selected, a 10% discount message is shown (pricing can be adjusted in `controllers/packageController.py`).
 3. Optional: visit `/myBundles` to see your bundle history.
+ 4. Use `/manageBundle` (sidebar: Manage Bundle) to view all purchased bundles sorted by purchase date. Each bundle shows its purchase date, derived expiry date (1 year after purchase) and the packages with their status (Utilised, Un-utilised, or Expired). If you have not purchased any bundle, the page will show the message "No Purchased Bundle".
 
 ### Notes
 - There is no limit to the number of bundles that can be purchased in a single day.
 - The `utilised` status for each purchased package is set to `false` on creation.
 - The purchase date is set to the current timestamp (UTC).
+- A bundle expires one year (365 days) after purchase; any un-utilised packages in an expired bundle are marked Expired.
 
