@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+ECA/
+.venv/
+venv/
+ENV/
+
+# OS / Editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Byte-compiled / cache
+**/__pycache__/
+
+# Flask instance folder
+instance/
+
+# Node/npm (if any future assets tooling)
+node_modules/

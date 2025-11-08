@@ -1,0 +1,57 @@
+{% from "_render_field.html" import render_field %}
+{% extends "base.html" %}
+
+<body>
+
+  {% block mainblock %}
+
+  {% if bookings|length == 0 %}
+  <h3>No booking to Manage</h3>
+  {% else %}
+  <div style="overflow-x:auto;">
+    <table>
+      <tr>
+        <th></th>
+        <th>Package Name</th>
+        <th>Check-In Date</th>
+        <th>Change to Date</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for booking in bookings %}
+      <tr>
+        <td style="width: 25%;">
+          <img src="{{booking.package.image_url}}" class="img-fluid" />
+        </td>
+        <td style="width:25%;">
+          {{booking.package.hotel_name}}
+        </td>
+        <td style="width:15%;">
+          {{booking.check_in_date|formatdate}}
+        </td>
+
+        <form method="POST" action="/updateBooking" style="display: inline">
+          <input type="hidden" value="{{booking.package.hotel_name}}" name="hotel_name">
+          <input type="hidden" value="{{booking.check_in_date}}" name="old_check_in_date">
+          <td style="width:20%;">
+            <input type="date" id="check_in_date" name="check_in_date">
+          </td>
+          <td>
+            <button type="submit" class="btn btn-primary" value="Update">Update</button>
+          </td>
+        </form>
+        <td>
+          <form method="POST" action="/deleteBooking" style="display: inline">
+            <input type="hidden" value="{{booking.package.hotel_name}}" name="hotel_name">
+            <input type="hidden" value="{{booking.check_in_date}}" name="old_check_in_date">
+            <button type="submit" class="btn btn-primary" value="Delete"
+              onclick="return confirm('Are you sure you want to delete booking?');" .>Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </div>
+
+  {% endblock %}

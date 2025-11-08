@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block mainblock %}
+
+<div class="col-xl-6 col-sm-4 p-2">
+    <div class="card card-common">
+<div class="card-header">
+    <h3>Package Incoming</h3>
+</div>
+<div class="card-body">
+        <!-- Create a div where the graph will take place -->
+        <div class="chart-container" style="position: relative; width: 100%; height: 80vh;">
+            <canvas id="myChart" width="400" height="300"></canvas>
+        </div>        
+</div>
+</div>
+</div>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script src="{{ url_for('static', filename='js/trend_chart.js') }}"></script>
+
+{% endblock %}

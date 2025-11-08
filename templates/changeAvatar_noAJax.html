@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+
+{% block mainblock %}
+{% for filename in filenames %}
+<!-- {{ package|pprint }} -->
+<div class="col-xl-3 col-md-4 col-sm-6 p-2">
+    <div class="card card-common h-100">
+        <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+            <img src="{{ url_for('static', filename='img/avatar/'+filename) }}" class="img-fluid" />
+            <a href="#!">
+                <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+            </a>
+        </div>
+        <div class="card-body">
+            <a href="/chooseAvatar/{{filename}}" class="btn btn-primary">Choose</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

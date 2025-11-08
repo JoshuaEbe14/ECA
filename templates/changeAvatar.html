@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+
+{% block mainblock %}
+{% for filename in filenames %}
+<!-- {{ package|pprint }} -->
+<div class="col-xl-3 col-md-4 col-sm-6 p-2">
+    <div class="card card-common h-100">
+        <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+            {% set the_id = "img" + loop.index0 |string %}
+            <img src="{{ url_for('static', filename='img/avatar/'+filename) }}" class="img-fluid" id={{ the_id }} />
+            <a href="#!">
+                <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+            </a>
+        </div>
+        <div class="card-body">
+            <button class="btn-primary avatarButton" id={{ loop.index0 }}>Choose</button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script src="{{ url_for('static', filename='js/changeAvatar.js') }}" defer></script>
+{% endblock %}

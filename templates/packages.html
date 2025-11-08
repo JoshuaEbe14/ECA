@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+<body>
+
+  {% block mainblock %}
+
+  {% for package in all_packages %}
+  <!-- {{ package|pprint }} -->
+  <div class="col-xl-4 col-md-6 col-sm-12 p-2">
+    <div class="card card-common h-100">
+      <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+        <img src="{{package.image_url}}" class="img-fluid" />
+        <a href="#!">
+          <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+        </a>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">{{package.hotel_name}}</h5>
+        <p class="card-text">{{package.description}}</p>
+        <a href="/viewPackageDetail/{{package.hotel_name}}" class="btn btn-primary">Details</a>
+        <a href="/view?hotel_name='{{package.hotel_name}}'" class="btn btn-primary">Book</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endblock %}
