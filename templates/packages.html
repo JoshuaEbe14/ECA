@@ -4,9 +4,60 @@
 
   {% block mainblock %}
 
+  <form id="bundleForm" action="{{ url_for('packageController.bundlePurchase') }}" method="post" class="w-100">
+    <div class="row">
+      <!-- Bundle panel (sits above cards; flash messages appear above this from base.html) -->
+      <div class="col-12 p-4">
+        <div class="bundle-panel">
+          <span class="bundle-panel-text">Select 2 or more packages to buy as a bundle to qualify for discount.</span>
+          <button type="submit" class="btn btn-primary purchase-bundle-btn">Purchase Bundle</button>
+        </div>
+      </div>
+
+      {% if bundles %}
+      <div class="col-12 p-2">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">My Bundle Purchases</h5>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Packages</th>
+                  <th>Utilised Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for b in bundles %}
+                <tr>
+                  <td>{{ b.purchased_date|formatdate }}</td>
+                  <td>
+                    {% for item in b.bundledPackages %}
+                      <span class="badge bg-secondary">{{ item.package.hotel_name }}</span>
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {% for item in b.bundledPackages %}
+                      {% if item.utilised %}
+                        <span class="text-success">Used</span>
+                      {% else %}
+                        <span class="text-danger">Not Used</span>
+                      {% endif %}
+                      {% if not loop.last %}|{% endif %}
+                    {% endfor %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
   {% for package in all_packages %}
   <!-- {{ package|pprint }} -->
-  <div class="col-xl-4 col-md-6 col-sm-12 p-2">
+  <div class="col-xl-4 col-md-4 col-sm-12 p-2">
     <div class="card card-common h-100">
       <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
         <img src="{{package.image_url}}" class="img-fluid" />
@@ -19,8 +70,11 @@
         <p class="card-text">{{package.description}}</p>
         <a href="/viewPackageDetail/{{package.hotel_name}}" class="btn btn-primary">Details</a>
         <a href="/view?hotel_name='{{package.hotel_name}}'" class="btn btn-primary">Book</a>
+        <input type="checkbox" name="bundle_packages" value="{{package.hotel_name}}" class="bundle-checkbox ml-2" aria-label="Select package for bundle">
       </div>
     </div>
   </div>
   {% endfor %}
+    </div>
+  </form>
   {% endblock %}
