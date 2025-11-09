@@ -17,8 +17,7 @@ booking = Blueprint('bookingController', __name__) # use bookingController.fn
 def view():
     if current_user.name == 'Admin':
         flash('This is a non-admin function. Please log in as a non-admin user to use this function.')
-        if 'viewPackageDetail' in request.referrer:
-            return redirect(request.referrer)
+        return redirect(request.referrer)
     form = BookForm()
     hotel_name=request.args.get('hotel_name').strip("'")
 
