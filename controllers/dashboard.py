@@ -42,5 +42,35 @@ def trend_chart():
         for hotel, dateAmts in hotel_costbyDate.items():
             hotel_costbyDateSortedListValues[hotel] = sorted(list(dateAmts.items()))
 
-        return jsonify({'chartDim': hotel_costbyDateSortedListValues, 'labels': []})    
+        return jsonify({'chartDim': hotel_costbyDateSortedListValues, 'labels': []})
+
+@dashboard.route('/bookings_by_month', methods=['POST'])
+def bookings_by_month():
+    """
+    Aggregates bookings by month-year for each hotel.
+    Returns format: {hotel_name: {month-year: count, ...}, ...}
+    """
+    all_bookings = Booking.getAllBookings()
+    print(f"Processing {len(all_bookings)} bookings for month aggregation")
+
+    # hotel_bookingsByMonth[hotel_name] = {month-year: count, ...}
+    hotel_bookingsByMonth = {}
+
+    for aBooking in list(all_bookings):
+        hotel_name = aBooking.package.hotel_name
+        check_in_date = aBooking.check_in_date
+
+        # Format as "Month YYYY" (e.g., "January 2022")
+        month_year = check_in_date.strftime("%B %Y")
+
+        if hotel_name not in hotel_bookingsByMonth:
+            hotel_bookingsByMonth[hotel_name] = {}
+        if month_year not in hotel_bookingsByMonth[hotel_name]:
+            hotel_bookingsByMonth[hotel_name][month_year] = 0
+        hotel_bookingsByMonth[hotel_name][month_year] += 1
+
+    # Sort hotels alphabetically
+    sorted_hotel_data = dict(sorted(hotel_bookingsByMonth.items()))
+
+    return jsonify({'chartData': sorted_hotel_data})
 
